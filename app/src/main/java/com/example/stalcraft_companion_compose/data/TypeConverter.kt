@@ -1,10 +1,10 @@
-package com.example.stalcraft_companion.data
+package com.example.stalcraft_companion_compose.data
 
 import androidx.room.TypeConverter
-import com.example.stalcraft_companion.data.modles.InfoBlock
-import com.example.stalcraft_companion.data.modles.StatusObject
-import com.example.stalcraft_companion.data.modles.TranslationLines
-import com.example.stalcraft_companion.data.modles.TranslationString
+import com.example.stalcraft_companion_compose.data.models.InfoBlock
+import com.example.stalcraft_companion_compose.data.models.StatusObject
+import com.example.stalcraft_companion_compose.data.models.TranslationLines
+import com.example.stalcraft_companion_compose.data.models.TranslationString
 import com.google.gson.reflect.TypeToken
 
 class TypeConverter {

@@ -1,10 +1,10 @@
-package com.example.stalcraft_companion.data
+package com.example.stalcraft_companion_compose.data
 
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy.Companion.REPLACE
 import androidx.room.Query
-import com.example.stalcraft_companion.data.modles.Item
+import com.example.stalcraft_companion_compose.data.models.Item
 import kotlinx.coroutines.flow.Flow
 
 @Dao

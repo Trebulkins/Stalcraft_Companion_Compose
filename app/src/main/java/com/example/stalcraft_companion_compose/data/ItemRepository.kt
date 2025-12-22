@@ -1,8 +1,8 @@
-package com.example.stalcraft_companion.data
+package com.example.stalcraft_companion_compose.data
 
 import android.content.Context
-import com.example.stalcraft_companion.data.modles.Item
-import com.example.stalcraft_companion.data.modles.Prefs
+import com.example.stalcraft_companion_compose.data.models.Item
+import com.example.stalcraft_companion_compose.data.models.Prefs
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext

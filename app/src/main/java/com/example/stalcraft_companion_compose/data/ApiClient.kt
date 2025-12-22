@@ -1,4 +1,4 @@
-package com.example.stalcraft_companion.data
+package com.example.stalcraft_companion_compose.data
 
 import com.example.stalcraft_companion_compose.data.models.Item
 import com.example.stalcraft_companion_compose.data.models.ListingItem
