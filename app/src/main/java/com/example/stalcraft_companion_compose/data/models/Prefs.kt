@@ -1,6 +1,7 @@
-package com.example.stalcraft_companion.data.modles
+package com.example.stalcraft_companion_compose.data.models
 
 import android.content.Context
+import androidx.core.content.edit
 
 object Prefs {
     private const val PREFS_NAME = "app_prefs"
@@ -13,8 +14,8 @@ object Prefs {
 
     fun setLastUpdate(context: Context, date: String) {
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            .edit()
-            .putString(LAST_UPDATE_KEY, date)
-            .apply()
+            .edit {
+                putString(LAST_UPDATE_KEY, date)
+            }
     }
 }

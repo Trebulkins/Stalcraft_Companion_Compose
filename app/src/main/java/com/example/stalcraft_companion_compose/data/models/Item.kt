@@ -3,8 +3,6 @@ package com.example.stalcraft_companion_compose.data.models
 import android.os.Parcelable
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.example.stalcraft_companion.data.modles.InfoBlock
-import com.example.stalcraft_companion.data.modles.TranslationString
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 import kotlinx.parcelize.Parcelize

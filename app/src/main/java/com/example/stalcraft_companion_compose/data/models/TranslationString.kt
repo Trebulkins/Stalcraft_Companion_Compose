@@ -1,4 +1,4 @@
-package com.example.stalcraft_companion.data.modles
+package com.example.stalcraft_companion_compose.data.models
 
 import android.os.Parcelable
 import com.google.gson.annotations.Expose
