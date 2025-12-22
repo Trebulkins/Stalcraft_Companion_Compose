@@ -21,14 +21,14 @@ class ItemViewModel(application: Application) : AndroidViewModel(application) {
     val items: LiveData<List<Item>>
     val isLoading = MutableLiveData(false)
     val error = MutableLiveData<String?>()
+    val progressCurrent = MutableLiveData(0)
+    val progressTotal = MutableLiveData(100)
 
     init {
         val dao = AppDatabase.getInstance(application).itemDao()
         repository = ItemRepository(dao)
         items = repository.getAllItems().asLiveData()
     }
-
-    val progress = MutableLiveData<Pair<Int, Int>>()
 
     suspend fun checkForUpdates(): Boolean {
         return withContext(Dispatchers.IO) {
@@ -45,7 +45,8 @@ class ItemViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 repository.refreshData(getApplication()) { current, total ->
-                    progress.postValue(Pair(current, total))
+                    progressCurrent.postValue(current)
+                    progressTotal.postValue(total)
                 }
                 withContext(Dispatchers.Main) {
                     error.value = null

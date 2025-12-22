@@ -25,7 +25,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -36,7 +36,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import com.example.stalcraft_companion_compose.data.ApiClient
 import com.example.stalcraft_companion_compose.interf.ItemViewModel
 import com.example.stalcraft_companion_compose.ui.theme.Stalcraft_Companion_ComposeTheme
@@ -60,7 +59,7 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.padding(innerPadding),
                         context = this,
                         owner = this,
-                        vm = viewModel,
+                        viewModel = viewModel,
                     )
                 }
             }
@@ -76,7 +75,7 @@ private fun getLastUpdateInfo(): String {
     }
     return SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
         .format(SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault())
-            .parse(repoInfo.updatedAt.toString()) ?: Date()
+            .parse(repoInfo.updatedAt) ?: Date()
         )
 }
 
@@ -95,18 +94,17 @@ private fun isNetworkAvailable(context: Context): Boolean {
     return networkInfo != null && networkInfo.isConnected
 }
 
-private suspend fun checkForUpdates(viewModel: ItemViewModel, owner: LifecycleOwner, netAvailable: Boolean) {
+private suspend fun checkForUpdates(viewModel: ItemViewModel, owner: LifecycleOwner, netAvailable: Boolean): Boolean {
     if (!netAvailable) {
         println("Нет подключения к интернету")
         loadData(viewModel, owner)
-        return
+        return false
     }
 
     try {
         val needsUpdate = withContext(Dispatchers.IO) { viewModel.checkForUpdates() }
-
         if (needsUpdate) {
-            showUpdateDialog()
+            return true
         } else {
             loadData(viewModel, owner)
         }
@@ -115,20 +113,21 @@ private suspend fun checkForUpdates(viewModel: ItemViewModel, owner: LifecycleOw
         Log.e("Update check", "Update error: $e")
         loadData(viewModel, owner)
     }
+    return false
 }
 
 @Composable
 fun AppContent(modifier: Modifier, context: Context, viewModel: ItemViewModel, owner: LifecycleOwner) {
     var showUpdateDialog by remember { mutableStateOf(false) }
     var showProgressDialog by remember { mutableStateOf(false) }
-    var downloadProgress by remember { mutableFloatStateOf(0f) }
+    var progressCurrent by remember { mutableStateOf(viewModel.progressCurrent) }
+    var progressTotal by remember { mutableStateOf(viewModel.progressTotal) }
     val coroutineScope = rememberCoroutineScope()
     val netAvailable = isNetworkAvailable(context)
 
     // При запуске приложения проверяем обновление
     LaunchedEffect(Unit) {
-        checkForUpdates(viewModel = viewModel, owner = owner, netAvailable = netAvailable)
-        showUpdateDialog = true
+        showUpdateDialog = checkForUpdates(viewModel = viewModel, owner = owner, netAvailable = netAvailable)
     }
 
     // Основной контент приложения
@@ -144,6 +143,11 @@ fun AppContent(modifier: Modifier, context: Context, viewModel: ItemViewModel, o
         }
     }
 
+    suspend fun update(viewModel: ItemViewModel) {
+        viewModel.performUpdate()
+        println("Обновление завершено!")
+        showProgressDialog = true
+    }
 
     // Диалог предложения обновления
     if (showUpdateDialog) {
@@ -157,8 +161,7 @@ fun AppContent(modifier: Modifier, context: Context, viewModel: ItemViewModel, o
                         showUpdateDialog = false
                         showProgressDialog = true
                         coroutineScope.launch {
-                            viewModel.performUpdate()
-                            showProgressDialog = false
+                            update(viewModel)
                         }
                     }
                 ) {
@@ -178,7 +181,7 @@ fun AppContent(modifier: Modifier, context: Context, viewModel: ItemViewModel, o
     // Диалог с прогрессом загрузки
     if (showProgressDialog) {
         Dialog(
-            onDismissRequest = { /* Не закрываем при клике вне диалога */ }
+            onDismissRequest = { }
         ) {
             Card(
                 modifier = Modifier.padding(16.dp),
@@ -195,15 +198,15 @@ fun AppContent(modifier: Modifier, context: Context, viewModel: ItemViewModel, o
                     Spacer(modifier = Modifier.height(24.dp))
 
                     // Индикатор прогресса
-                    LinearProgressIndicator(
-                        progress = { downloadProgress },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
+                    // LinearProgressIndicator(
+                    //    progress = 0f,
+                    //    modifier = Modifier.fillMaxWidth()
+                    //)
+                    //Spacer(modifier = Modifier.height(16.dp))
 
                     // Текстовое отображение прогресса
                     Text(
-                        text = "${(downloadProgress * 100).toInt()}%",
+                        text = "${progressCurrent.value} / ${progressTotal.value}",
                         style = MaterialTheme.typography.bodyMedium
                     )
                     Spacer(modifier = Modifier.height(8.dp))

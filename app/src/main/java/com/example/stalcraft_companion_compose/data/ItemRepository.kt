@@ -23,10 +23,12 @@ class ItemRepository(private val itemDao: ItemDao) {
             val listings = ApiClient.databaseApi.getItemListings()
             val totalItems = listings.size
             val items = mutableListOf<Item>()
+            println("Предметов собрано: $totalItems")
 
             listings.forEachIndexed { index, listing ->
                 val item = ApiClient.databaseApi.getItem(listing.data)
                 items.add(item)
+                println("Прогресс: $index / $totalItems")
                 progressCallback(index + 1, totalItems)
             }
 
