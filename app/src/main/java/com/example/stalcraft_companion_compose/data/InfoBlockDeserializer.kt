@@ -1,6 +1,5 @@
 package com.example.stalcraft_companion_compose.data
 
-import android.util.Log
 import com.example.stalcraft_companion_compose.data.models.FormattedObject
 import com.example.stalcraft_companion_compose.data.models.InfoBlock
 import com.example.stalcraft_companion_compose.data.models.TranslationLines

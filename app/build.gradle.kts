@@ -68,7 +68,6 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     annotationProcessor(libs.androidx.room.room.compiler)
     ksp(libs.androidx.room.room.compiler)
-
     //RxJava2
     implementation(libs.rxjava)
     implementation(libs.rxandroid)

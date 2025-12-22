@@ -58,7 +58,9 @@ class MainActivity : ComponentActivity() {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     AppContent(
                         modifier = Modifier.padding(innerPadding),
-                        context = this
+                        context = this,
+                        owner = this,
+                        vm = viewModel,
                     )
                 }
             }
@@ -81,7 +83,7 @@ private fun getLastUpdateInfo(): String {
 private fun loadData(viewModel: ItemViewModel, owner: LifecycleOwner) {
     viewModel.items.observe(owner) { items ->
         if (items.isNotEmpty()) {
-            showData()
+
         }
     }
 }
@@ -93,41 +95,39 @@ private fun isNetworkAvailable(context: Context): Boolean {
     return networkInfo != null && networkInfo.isConnected
 }
 
-private fun checkForUpdates(viewModel: ItemViewModel, owner: LifecycleOwner, netAvailable: Boolean) {
+private suspend fun checkForUpdates(viewModel: ItemViewModel, owner: LifecycleOwner, netAvailable: Boolean) {
     if (!netAvailable) {
         println("Нет подключения к интернету")
         loadData(viewModel, owner)
         return
     }
 
-    lifecycleScope.launch {
-        try {
-            val needsUpdate = withContext(Dispatchers.IO) { viewModel.checkForUpdates() }
+    try {
+        val needsUpdate = withContext(Dispatchers.IO) { viewModel.checkForUpdates() }
 
-            if (needsUpdate) {
-                showUpdateDialog()
-            } else {
-                loadData(viewModel, owner)
-            }
-        } catch (e: Exception) {
-            println("Ошибка обновления: $e")
-            Log.e("Update check", "Update error: $e")
+        if (needsUpdate) {
+            showUpdateDialog()
+        } else {
             loadData(viewModel, owner)
         }
+    } catch (e: Exception) {
+        println("Ошибка обновления: $e")
+        Log.e("Update check", "Update error: $e")
+        loadData(viewModel, owner)
     }
 }
 
 @Composable
-fun AppContent(modifier: Modifier, context: Context) {
+fun AppContent(modifier: Modifier, context: Context, viewModel: ItemViewModel, owner: LifecycleOwner) {
     var showUpdateDialog by remember { mutableStateOf(false) }
     var showProgressDialog by remember { mutableStateOf(false) }
     var downloadProgress by remember { mutableFloatStateOf(0f) }
     val coroutineScope = rememberCoroutineScope()
-    var netAvailable = isNetworkAvailable(context)
+    val netAvailable = isNetworkAvailable(context)
 
     // При запуске приложения проверяем обновление
     LaunchedEffect(Unit) {
-        checkForUpdates()
+        checkForUpdates(viewModel = viewModel, owner = owner, netAvailable = netAvailable)
         showUpdateDialog = true
     }
 
@@ -157,9 +157,7 @@ fun AppContent(modifier: Modifier, context: Context) {
                         showUpdateDialog = false
                         showProgressDialog = true
                         coroutineScope.launch {
-                            update { progress ->
-                                downloadProgress = progress
-                            }
+                            viewModel.performUpdate()
                             showProgressDialog = false
                         }
                     }
@@ -213,20 +211,4 @@ fun AppContent(modifier: Modifier, context: Context) {
             }
         }
     }
-}
-
-// Функция проверки обновления (заглушка)
-private suspend fun checkUpdate() {
-    // Здесь выполняется проверка версии API
-    println("Проверка обновлений...")
-}
-
-// Функция обновления (заглушка)
-private suspend fun update(onProgress: (Float) -> Unit) {
-    // Здесь выполняется загрузка обновления
-    for (i in 0..100 step 10) {
-        onProgress(i / 100f)
-        println("Прогресс загрузки: $i%")
-    }
-    println("Обновление завершено!")
 }
