@@ -7,4 +7,11 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <color name="DEFAULT">#939393</color>
+    <color name="RANK_NEWBIE">#4ad94b</color>
+    <color name="RANK_STALKER">#5555ff</color>
+    <color name="RANK_VETERAN">#940394</color>
+    <color name="RANK_MASTER">#d14849</color>
+    <color name="RANK_LEGEND">#ffaa00</color>
 </resources>

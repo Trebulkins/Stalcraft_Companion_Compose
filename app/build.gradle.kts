@@ -77,4 +77,6 @@ dependencies {
     implementation(libs.retrofit2.converter.gson)
     //Picasso
     implementation(libs.picasso)
+
+    implementation("io.coil-kt.coil3:coil-compose:3.3.0")
 }

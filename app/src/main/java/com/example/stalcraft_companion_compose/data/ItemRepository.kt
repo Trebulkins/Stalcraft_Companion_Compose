@@ -28,7 +28,6 @@ class ItemRepository(private val itemDao: ItemDao) {
             listings.forEachIndexed { index, listing ->
                 val item = ApiClient.databaseApi.getItem(listing.data)
                 items.add(item)
-                println("Прогресс: $index / $totalItems")
                 progressCallback(index + 1, totalItems)
             }
 
