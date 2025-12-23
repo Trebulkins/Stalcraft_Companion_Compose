@@ -25,7 +25,6 @@ data class Item (
         other as Item
         return id == other.id
     }
-
     override fun hashCode(): Int = id.hashCode()
 }
 

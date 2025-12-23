@@ -1,4 +1,4 @@
-package com.example.stalcraft_companion_compose.interf
+package com.example.stalcraft_companion_compose.data
 
 import android.app.Application
 import android.content.Context
@@ -7,18 +7,12 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.asLiveData
 import androidx.lifecycle.liveData
 import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
-import com.example.stalcraft_companion_compose.data.ApiClient
-import com.example.stalcraft_companion_compose.data.AppDatabase
-import com.example.stalcraft_companion_compose.data.ItemRepository
 import com.example.stalcraft_companion_compose.data.models.Item
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -109,14 +103,6 @@ class ItemViewModel(application: Application) : AndroidViewModel(application) {
             currentSet.plus(categoryName)
         }
         _expandedCategories.value = newSet
-    }
-    fun expandAllCategories() {
-        val currentItems = _items.value ?: emptyList()
-        val allCategories = currentItems.map { it.category }.distinct()
-        _expandedCategories.value = allCategories.toSet()
-    }
-    fun collapseAllCategories() {
-        _expandedCategories.value = emptySet()
     }
 
     fun selectItem(item: Item) {

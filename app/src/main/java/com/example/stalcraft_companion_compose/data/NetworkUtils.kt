@@ -1,4 +1,4 @@
-package com.example.stalcraft_companion_compose
+package com.example.stalcraft_companion_compose.data
 
 import android.content.Context
 import android.net.ConnectivityManager
