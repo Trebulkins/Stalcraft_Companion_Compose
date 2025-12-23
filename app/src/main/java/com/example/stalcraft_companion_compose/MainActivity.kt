@@ -9,7 +9,6 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -51,22 +50,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil3.compose.AsyncImage
-import coil3.compose.rememberAsyncImagePainter
-import com.example.stalcraft_companion_compose.data.ApiClient
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.bumptech.glide.integration.compose.GlideImage
 import com.example.stalcraft_companion_compose.data.models.Item
 import com.example.stalcraft_companion_compose.data.models.TranslationString
 import com.example.stalcraft_companion_compose.data.ItemViewModel
 import com.example.stalcraft_companion_compose.ui.theme.Stalcraft_Companion_ComposeTheme
-import com.squareup.picasso.Picasso
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -245,6 +240,7 @@ fun AppContent(modifier: Modifier, context: Context, viewModel: ItemViewModel, o
     }
 }
 
+@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun ItemCard(
     item: Item,
@@ -265,7 +261,7 @@ fun ItemCard(
             // Цвет редкости
             Box(
                 modifier = Modifier
-                    .size(5.dp, 80.dp)
+                    .size(4.dp, 80.dp)
                     .background(
                         color = when (item.color) {
                             "DEFAULT" -> Color(0x93B4B4B4)
@@ -279,12 +275,13 @@ fun ItemCard(
                         shape = CircleShape
                     )
             )
+            Spacer(modifier = Modifier.width(6.dp))
 
             // Изображение
-            AsyncImage(
+            GlideImage(
                 model = "https://raw.githubusercontent.com/EXBO-Studio/stalcraft-database/main/ru/" + item.iconPath,
                 contentDescription = null,
-                modifier = Modifier.size(60.dp)
+                modifier = Modifier.size(80.dp),
             )
 
             Spacer(modifier = Modifier.width(8.dp))
