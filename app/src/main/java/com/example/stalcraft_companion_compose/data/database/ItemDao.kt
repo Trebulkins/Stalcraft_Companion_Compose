@@ -1,4 +1,4 @@
-package com.example.stalcraft_companion_compose.data
+package com.example.stalcraft_companion_compose.data.database
 
 import androidx.room.Dao
 import androidx.room.Insert

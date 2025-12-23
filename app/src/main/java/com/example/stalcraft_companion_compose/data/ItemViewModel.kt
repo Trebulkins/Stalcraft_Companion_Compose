@@ -10,6 +10,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.liveData
 import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
+import com.example.stalcraft_companion_compose.api.ApiClient
+import com.example.stalcraft_companion_compose.data.database.AppDatabase
+import com.example.stalcraft_companion_compose.data.database.ItemRepository
 import com.example.stalcraft_companion_compose.data.models.Item
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,6 +36,8 @@ class ItemViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _selectedItem = MutableLiveData<Item?>(null)
     val selectedItem: LiveData<Item?> = _selectedItem
+    private val _showItemDetail = MutableLiveData<Boolean>(false)
+    val showItemDetail: LiveData<Boolean> = _showItemDetail
 
     val isLoading = MutableLiveData(false)
     val error = MutableLiveData<String?>()
@@ -89,10 +94,8 @@ class ItemViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun getItemById(id: String): LiveData<Item?> {
-        return liveData {
-            emit(repository.getItemById(id))
-        }
+    fun getItemById(itemId: String): Item? {
+        return _items.value?.find { it.id == itemId }
     }
 
     fun toggleCategoryExpansion(categoryName: String) {
@@ -107,9 +110,11 @@ class ItemViewModel(application: Application) : AndroidViewModel(application) {
 
     fun selectItem(item: Item) {
         _selectedItem.value = item
+        _showItemDetail.value = true
     }
 
-    fun clearSelectedItem() {
+    fun closeItemDetail() {
+        _showItemDetail.value = false
         _selectedItem.value = null
     }
 

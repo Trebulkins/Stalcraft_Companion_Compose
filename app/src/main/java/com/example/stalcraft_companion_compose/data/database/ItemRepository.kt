@@ -1,6 +1,7 @@
-package com.example.stalcraft_companion_compose.data
+package com.example.stalcraft_companion_compose.data.database
 
 import android.content.Context
+import com.example.stalcraft_companion_compose.api.ApiClient
 import com.example.stalcraft_companion_compose.data.models.Item
 import com.example.stalcraft_companion_compose.data.models.Prefs
 import kotlinx.coroutines.Dispatchers

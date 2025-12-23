@@ -1,4 +1,4 @@
-package com.example.stalcraft_companion_compose.data
+package com.example.stalcraft_companion_compose.api
 
 import com.example.stalcraft_companion_compose.data.models.FormattedObject
 import com.example.stalcraft_companion_compose.data.models.InfoBlock
