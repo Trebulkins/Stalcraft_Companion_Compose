@@ -24,7 +24,6 @@ adapterRxjava2 = "2.9.0"
 converterGson = "2.9.0"
 appcompat = "1.7.0"
 kotlinxCoroutinesAndroid = "1.1.1"
-coil = "3.3.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -62,7 +61,6 @@ retrofit2-adapter-rxjava2 = { module = "com.squareup.retrofit2:adapter-rxjava2",
 retrofit2-converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
 rxandroid = { module = "io.reactivex.rxjava2:rxandroid", version.ref = "rxandroid" }
 rxjava = { module = "io.reactivex.rxjava2:rxjava", version.ref = "rxjava" }
-coil = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil"}
 
 [plugins]
 devtoolsKsp = { id = "com.google.devtools.ksp", version.ref = "ksp"}

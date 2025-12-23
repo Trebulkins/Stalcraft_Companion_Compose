@@ -127,6 +127,21 @@ class ItemViewModel(application: Application) : AndroidViewModel(application) {
         _selectedItem.value = null
     }
 
+    // Вычисляемое свойство для уникальных категорий
+    val uniqueCategories: LiveData<List<String>>
+        get() = _items.map { items ->
+            items.map { it.category }
+                .distinct()
+                .sorted()
+        }
+
+    // Получаем предметы по категории
+    fun getItemsByCategory(category: String): LiveData<List<Item>> {
+        return _items.map { items ->
+            items.filter { it.category == category }
+        }
+    }
+
     fun getLastUpdateInfo(): String {
         val repoInfo = try {
             runBlocking { ApiClient.githubApi.getRepoInfo() }

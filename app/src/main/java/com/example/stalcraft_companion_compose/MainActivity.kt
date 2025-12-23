@@ -8,6 +8,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,7 +20,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -27,14 +33,17 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -50,9 +59,12 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
+import com.example.stalcraft_companion_compose.data.ApiClient
 import com.example.stalcraft_companion_compose.data.models.Item
+import com.example.stalcraft_companion_compose.data.models.TranslationString
 import com.example.stalcraft_companion_compose.interf.ItemViewModel
 import com.example.stalcraft_companion_compose.ui.theme.Stalcraft_Companion_ComposeTheme
+import com.squareup.picasso.Picasso
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -112,10 +124,20 @@ private suspend fun checkForUpdates(viewModel: ItemViewModel, owner: LifecycleOw
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppContent(modifier: Modifier, context: Context, viewModel: ItemViewModel, owner: LifecycleOwner) {
+    val items by viewModel.items.observeAsState(emptyList())
+    val uniqueCategories by viewModel.uniqueCategories.observeAsState(emptyList())
+    val expandedCategories by viewModel.expandedCategories.observeAsState(emptySet())
+
     var showUpdateDialog by remember { mutableStateOf(false) }
     var showProgressDialog by remember { mutableStateOf(false) }
     val progress = viewModel.progress.collectAsStateWithLifecycle()
     val coroutineScope = rememberCoroutineScope()
+
+    // Группируем предметы по категориям
+    val itemsByCategory = remember(items) {
+        items.groupBy { it.category }
+            .mapValues { (_, items) -> items }
+    }
 
     // При запуске приложения проверяем обновление
     LaunchedEffect(Unit) {
@@ -126,6 +148,37 @@ fun AppContent(modifier: Modifier, context: Context, viewModel: ItemViewModel, o
         )
     }
 
+    Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = {
+                    Text(
+                        "База предметов",
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                }
+            )
+        }
+    ) { paddingValues ->
+        Box(modifier = Modifier.fillMaxSize()) {
+            // Основной контент
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+
+            ) { items(uniqueCategories) { category ->
+                    CategorySection(
+                        category = category,
+                        items = itemsByCategory[category] ?: emptyList(),
+                        isExpanded = expandedCategories.contains(category),
+                        onCategoryClick = { viewModel.toggleCategoryExpansion(category) },
+                        onItemClick = { viewModel.selectItem(it) }
+                    )
+                }
+            }
+        }
+    }
 
     // Диалог предложения обновления
     if (showUpdateDialog) {
@@ -210,7 +263,7 @@ fun ItemCard(
             // Цвет редкости
             Box(
                 modifier = Modifier
-                    .size(20.dp)
+                    .size(5.dp, 40.dp)
                     .background(
                         color = when (item.color) {
                             "DEFAULT" -> Color(0x93B4B4B4)
@@ -227,9 +280,9 @@ fun ItemCard(
 
             // Изображение
             AsyncImage(
-                model = item.iconPath,
+                model = Picasso.get().load(ApiClient.DATABASE_BASE_URL + item.iconPath),
                 contentDescription = item.name.toString(),
-                placeholder = painterResource(id = R.drawable.radioactive_icon),
+                placeholder = painterResource(id = R.drawable.ic_launcher_background),
                 modifier = Modifier.size(60.dp)
             )
 
@@ -244,11 +297,16 @@ fun ItemCard(
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Medium
                 )
-                Text(
-                    text = item.name.toString(),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
+                when (val name = item.name) {
+                    is TranslationString.Text -> name.text
+                    is TranslationString.Translation -> name.lines.ru
+                }?.let {
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
                 Text(
                     text = item.id,
                     style = MaterialTheme.typography.titleSmall,
@@ -260,28 +318,85 @@ fun ItemCard(
 }
 
 @Composable
-fun LoadingOverlay() {
-    Box(
+fun CategorySection(
+    category: String,
+    items: List<Item>,
+    isExpanded: Boolean,
+    onCategoryClick: () -> Unit,
+    onItemClick: (Item) -> Unit
+) {
+    Card(
         modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.7f)),
-        contentAlignment = Alignment.Center
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 2.dp
+        )
     ) {
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(32.dp)
-        ) {
-            Column(
-                modifier = Modifier.padding(24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+        Column {
+            // Заголовок категории
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onCategoryClick() }
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                CircularProgressIndicator()
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = "Загрузка данных...",
-                    style = MaterialTheme.typography.titleMedium
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = category,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    if (items.isNotEmpty()) {
+                        Text(
+                            text = "${items.size} предметов",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                        )
+                    }
+                }
+
+                Icon(
+                    imageVector = if (isExpanded)
+                        Icons.Default.KeyboardArrowUp
+                    else
+                        Icons.Default.KeyboardArrowDown,
+                    contentDescription = if (isExpanded)
+                        "Свернуть"
+                    else
+                        "Развернуть",
+                    tint = MaterialTheme.colorScheme.primary
                 )
+            }
+
+            // Анимация раскрытия/закрытия
+            androidx.compose.animation.AnimatedVisibility(
+                visible = isExpanded && items.isNotEmpty(),
+                enter = androidx.compose.animation.expandVertically(),
+                exit = androidx.compose.animation.shrinkVertically()
+            ) {
+                Column(
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
+                        .padding(bottom = 16.dp)
+                ) {
+                    items.forEachIndexed { index, item ->
+                        ItemCard(
+                            item = item,
+                            onClick = { onItemClick(item) }
+                        )
+                        if (index < items.size - 1) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+                    }
+                }
             }
         }
     }
