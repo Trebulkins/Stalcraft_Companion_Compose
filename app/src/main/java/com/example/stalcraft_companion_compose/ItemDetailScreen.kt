@@ -1,5 +1,6 @@
 package com.example.stalcraft_companion_compose
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,7 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.List
@@ -38,8 +39,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.core.graphics.component1
-import androidx.core.graphics.component2
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
@@ -166,7 +165,6 @@ fun ItemDetailContent(
             }
         }
 
-        // Дополнительные характеристики
         if (item.infoBlocks!!.isNotEmpty()) {
             item {
                 Text(
@@ -176,16 +174,22 @@ fun ItemDetailContent(
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
             }
-            items(item.infoBlocks as List<InfoBlock>) { infoblock ->
-                when (infoblock.type) {
-                    "text" -> TextBlockLine(infoblock as InfoBlock.TextBlock)
-                    "damage" -> DamageBlockLine(infoblock as InfoBlock.DamageBlock)
-                    "list" -> ListBlockLine(infoblock as InfoBlock.ListBlock)
-                    "numeric" -> NumericBlockLine(infoblock as InfoBlock.NumericBlock)
-                    "key-value" -> KeyValueBlockLine(infoblock as InfoBlock.KeyValueBlock)
-                    "range" -> RangeBlockLine(infoblock as InfoBlock.RangeBlock)
-                    "usage" -> UsageBlockLine(infoblock as InfoBlock.UsageBlock)
-                    "item" -> ItemBlockLine(infoblock as InfoBlock.ItemBlock)
+            itemsIndexed(item.infoBlocks as List<InfoBlock>) { index, infoblock ->
+                Box(
+                    Modifier
+                        .background(if (index%2==0) Color(0xFFBABABA) else Color(0xFF878787))
+                        .fillMaxWidth()
+                ) {
+                    when (infoblock.type) {
+                        "text" -> TextBlockLine(infoblock as InfoBlock.TextBlock)
+                        "damage" -> DamageBlockLine(infoblock as InfoBlock.DamageBlock)
+                        "list" -> ListBlockLine(infoblock as InfoBlock.ListBlock)
+                        "numeric" -> NumericBlockLine(infoblock as InfoBlock.NumericBlock)
+                        "key-value" -> KeyValueBlockLine(infoblock as InfoBlock.KeyValueBlock)
+                        "range" -> RangeBlockLine(infoblock as InfoBlock.RangeBlock)
+                        "usage" -> UsageBlockLine(infoblock as InfoBlock.UsageBlock)
+                        "item" -> ItemBlockLine(infoblock as InfoBlock.ItemBlock)
+                    }
                 }
             }
         }
@@ -199,42 +203,160 @@ fun ItemDetailContent(
 
 @Composable
 fun ItemBlockLine(block: InfoBlock.ItemBlock) {
-    TODO("Not yet implemented")
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ){
+        Text(
+            text = block.name.toString(),
+            fontWeight = FontWeight.SemiBold
+        )
+    }
 }
 
 @Composable
 fun UsageBlockLine(block: InfoBlock.UsageBlock) {
-    TODO("Not yet implemented")
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ){
+        Text(
+            text = block.name.toString(),
+            fontWeight = FontWeight.SemiBold
+        )
+    }
 }
 
 @Composable
 fun RangeBlockLine(block: InfoBlock.RangeBlock) {
-    TODO("Not yet implemented")
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ){
+        Text(
+            text = block.name.toString(),
+            fontWeight = FontWeight.SemiBold
+        )
+        Text(
+            text = "[${block.min}, ${block.min}]",
+            fontWeight = FontWeight.Medium
+        )
+    }
 }
 
 @Composable
 fun KeyValueBlockLine(block: InfoBlock.KeyValueBlock) {
-    TODO("Not yet implemented")
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ){
+        Text(
+            text = block.key.toString(),
+            fontWeight = FontWeight.SemiBold
+        )
+        Text(
+            text = block.value.toString(),
+            fontWeight = FontWeight.Medium
+        )
+    }
 }
 
 @Composable
 fun NumericBlockLine(block: InfoBlock.NumericBlock) {
-    TODO("Not yet implemented")
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ){
+        Text(
+            text = block.name.toString(),
+            fontWeight = FontWeight.SemiBold
+        )
+        Text(
+            text = block.formatted.toString(),
+            fontWeight = FontWeight.Medium
+        )
+    }
 }
 
 @Composable
 fun ListBlockLine(block: InfoBlock.ListBlock) {
-    TODO("Not yet implemented")
+    LazyColumn(
+        modifier = Modifier.fillMaxWidth()
+    ){
+        itemsIndexed(block.elements as List<InfoBlock>) { index, infoblock ->
+            Box(
+                Modifier
+                    .background(if (index%2==0) Color(0xFFBABABA) else Color(0xFF878787))
+                    .fillMaxWidth()
+            ) {
+                when (infoblock.type) {
+                    "text" -> TextBlockLine(infoblock as InfoBlock.TextBlock)
+                    "damage" -> DamageBlockLine(infoblock as InfoBlock.DamageBlock)
+                    "list" -> ListBlockLine(infoblock as InfoBlock.ListBlock)
+                    "numeric" -> NumericBlockLine(infoblock as InfoBlock.NumericBlock)
+                    "key-value" -> KeyValueBlockLine(infoblock as InfoBlock.KeyValueBlock)
+                    "range" -> RangeBlockLine(infoblock as InfoBlock.RangeBlock)
+                    "usage" -> UsageBlockLine(infoblock as InfoBlock.UsageBlock)
+                    "item" -> ItemBlockLine(infoblock as InfoBlock.ItemBlock)
+                }
+            }
+        }
+    }
 }
 
 @Composable
 fun DamageBlockLine(block: InfoBlock.DamageBlock) {
-    TODO("Not yet implemented")
+    Column(
+        modifier = Modifier.fillMaxWidth()
+    ){
+        Text(
+            text = "Значения урона",
+            fontWeight = FontWeight.Bold
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ){
+            Text(
+                text = "До ${block.damageDecreaseStart}м",
+                fontWeight = FontWeight.SemiBold
+            )
+            Text(
+                text = block.startDamage.toString(),
+                fontWeight = FontWeight.Medium
+            )
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ){
+            Text(
+                text = "От ${block.damageDecreaseEnd} до ${block.maxDistance}м",
+                fontWeight = FontWeight.SemiBold
+            )
+            Text(
+                text = block.endDamage.toString(),
+                fontWeight = FontWeight.Medium
+            )
+        }
+    }
 }
 
 @Composable
 fun TextBlockLine(block: InfoBlock.TextBlock) {
-    TODO("Not yet implemented")
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ){
+        Text(
+            text = block.title.toString(),
+            fontWeight = FontWeight.SemiBold
+        )
+        Text(
+            text = block.text.toString(),
+            fontWeight = FontWeight.Medium
+        )
+    }
 }
 
 @Composable
@@ -283,45 +405,6 @@ fun InfoCard(
                     modifier = if (isMultiline) Modifier.padding(top = 4.dp) else Modifier
                 )
             }
-        }
-    }
-}
-
-@Composable
-fun AttributeCard(
-    attributeName: String,
-    attributeValue: String,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        modifier = modifier,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 1.dp
-        )
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = attributeName.replaceFirstChar { it.uppercase() },
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-                fontWeight = FontWeight.Medium
-            )
-
-            Text(
-                text = attributeValue,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.SemiBold
-            )
         }
     }
 }
