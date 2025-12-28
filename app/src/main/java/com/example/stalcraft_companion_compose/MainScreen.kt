@@ -111,6 +111,7 @@ fun MainScreen(
     val items by viewModel.items.observeAsState(emptyList())
     val uniqueCategories by viewModel.uniqueCategories.observeAsState(emptyList())
     val expandedCategories by viewModel.expandedCategories.observeAsState(emptySet())
+    val vwisLoading by viewModel.isLoading.observeAsState(false)
 
     var showUpdateDialog by remember { mutableStateOf(false) }
     var showProgressDialog by remember { mutableStateOf(false) }
@@ -143,7 +144,6 @@ fun MainScreen(
                 Button(
                     onClick = {
                         showUpdateDialog = false
-                        showProgressDialog = progress.value.first != progress.value.second
                         coroutineScope.launch {
                             viewModel.performUpdate()
                         }.isCompleted
@@ -163,7 +163,7 @@ fun MainScreen(
     }
 
     // Диалог с прогрессом загрузки
-    if (showProgressDialog) {
+    if (vwisLoading) {
         Dialog(
             onDismissRequest = { }
         ) {

@@ -77,8 +77,6 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.retrofit2.adapter.rxjava2)
     implementation(libs.retrofit2.converter.gson)
-    //Picasso
-    implementation(libs.picasso)
 
     implementation("com.github.bumptech.glide:glide:4.16.0")
     implementation("com.github.bumptech.glide:compose:1.0.0-beta01")
