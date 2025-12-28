@@ -76,7 +76,6 @@ class ItemViewModel(application: Application) : AndroidViewModel(application) {
             try {
                 repository.refreshData(getApplication()) { current, total ->
                     _progress.value = Pair(current, total)
-                    println("updateProgress: ${progress.value!!.first} / ${progress.value!!.second}")
                 }
                 withContext(Dispatchers.Main) {
                     error.value = null
@@ -94,8 +93,9 @@ class ItemViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun getItemById(itemId: String): Item? {
-        return _items.value?.find { it.id == itemId }
+    fun getItemById(itemId: String): Item {
+        println("Поиск предмета по ID: $itemId - ${repository.getItemById(itemId)}")
+        return repository.getItemById(itemId)!!
     }
 
     fun toggleCategoryExpansion(categoryName: String) {
@@ -106,16 +106,6 @@ class ItemViewModel(application: Application) : AndroidViewModel(application) {
             currentSet.plus(categoryName)
         }
         _expandedCategories.value = newSet
-    }
-
-    fun selectItem(item: Item) {
-        _selectedItem.value = item
-        _showItemDetail.value = true
-    }
-
-    fun closeItemDetail() {
-        _showItemDetail.value = false
-        _selectedItem.value = null
     }
 
     // Вычисляемое свойство для уникальных категорий

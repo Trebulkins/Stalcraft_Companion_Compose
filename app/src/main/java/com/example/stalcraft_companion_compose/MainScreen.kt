@@ -61,6 +61,8 @@ import com.example.stalcraft_companion_compose.data.models.TranslationString
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.math.round
+import kotlin.toBigDecimal
 
 
 private fun loadData(viewModel: ItemViewModel, owner: LifecycleOwner) {
@@ -135,21 +137,25 @@ fun MainScreen(
         }
     ) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize()) {
-            // Основной контент
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
+            if (items.isEmpty()) { LoadingOverlay() }
+            else {
+                // Основной контент
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
 
-            ) { items(uniqueCategories) { category ->
-                CategorySection(
-                    category = category,
-                    items = itemsByCategory[category] ?: emptyList(),
-                    isExpanded = expandedCategories.contains(category),
-                    onCategoryClick = { viewModel.toggleCategoryExpansion(category) },
-                    onItemClick = { viewModel.selectItem(it) }
-                )
-            }
+                ) {
+                    items(uniqueCategories) { category ->
+                        CategorySection(
+                            category = category,
+                            items = itemsByCategory[category] ?: emptyList(),
+                            isExpanded = expandedCategories.contains(category),
+                            onCategoryClick = { viewModel.toggleCategoryExpansion(category) },
+                            onItemClick = { item -> onNavigateToItemDetail(item.id) }
+                        )
+                    }
+                }
             }
         }
     }
@@ -164,7 +170,8 @@ fun MainScreen(
                 Button(
                     onClick = {
                         showUpdateDialog = false
-                        showProgressDialog = !coroutineScope.launch {
+                        showProgressDialog = progress.value.first != progress.value.second
+                        coroutineScope.launch {
                             viewModel.performUpdate()
                         }.isCompleted
                     }
@@ -207,7 +214,11 @@ fun MainScreen(
                     )
                     // Текстовое отображение прогресса
                     Text(
-                        text = "${progress.value.first} / ${progress.value.second} (${progress.value.first.toFloat() / progress.value.second.toFloat() * 100}%)",
+                        text = "${progress.value.first} / ${progress.value.second}",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Text(
+                        text = "( ${progress.value.first.toFloat() / progress.value.second.toFloat() * 100}% )",
                         style = MaterialTheme.typography.bodyMedium
                     )
                     Spacer(modifier = Modifier.height(8.dp))
@@ -388,24 +399,20 @@ fun LoadingOverlay() {
             .background(Color.Black.copy(alpha = 0.7f)),
         contentAlignment = Alignment.Center
     ) {
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(32.dp)
+        Column(
+            modifier = Modifier.padding(24.dp).fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Column(
-                modifier = Modifier.padding(24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                CircularProgressIndicator()
+            CircularProgressIndicator(
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
 
-                Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-                Text(
-                    text = "Загрузка данных...",
-                    style = MaterialTheme.typography.titleMedium
-                )
-            }
+            Text(
+                text = "Загрузка данных...",
+                style = MaterialTheme.typography.titleMedium
+            )
         }
     }
 }

@@ -42,9 +42,7 @@ class ItemRepository(private val itemDao: ItemDao) {
         }
     }
 
-    suspend fun getItemById(id: String): Item? = withContext(Dispatchers.IO) {
-        itemDao.getItemById(id)
-    }
+    fun getItemById(id: String): Item? = itemDao.getItemById(id)
 
     fun getAllItems(): Flow<List<Item>> = itemDao.getAllItems()
 

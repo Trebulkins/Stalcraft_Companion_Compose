@@ -1,22 +1,24 @@
 package com.example.stalcraft_companion_compose
 
-import androidx.compose.foundation.background
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -36,6 +38,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -56,24 +59,24 @@ fun ItemDetailScreen(
     viewModel: ItemViewModel = viewModel()
 ){
     // Получаем предмет по ID
-    val item by remember(itemId) {
+    val item by remember {
         derivedStateOf { viewModel.getItemById(itemId) }
     }
+    println(item)
+    BackHandler(onBack = onNavigateBack)
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
-                    when (val name = item?.name) {
+                    when (val name = item.name) {
                         is TranslationString.Text -> name.text
                         is TranslationString.Translation -> name.lines.ru
-                        else -> "Предмет"
                     }?.let {
                         Text(
                             text = it,
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
-                            maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
                     }
@@ -93,7 +96,7 @@ fun ItemDetailScreen(
         }
     ) { paddingValues ->
         ItemDetailContent(
-            item = item!!,
+            item = item,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
@@ -112,56 +115,50 @@ fun ItemDetailContent(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item {
-            // Изображение предмета
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(250.dp)
-                    .padding(horizontal = 16.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                GlideImage(
-                    model = ApiClient.DATABASE_BASE_URL + item.iconPath,
-                    contentDescription = null,
-                    modifier = Modifier.size(80.dp),
-                )
-            }
-        }
+            Row(
+                Modifier.fillMaxWidth().padding(4.dp, 12.dp)
+            ){
+                Box(
+                    modifier = Modifier.fillMaxHeight().width(160.dp).align(Alignment.CenterVertically).padding(horizontal = 4.dp)
+                ){
+                    GlideImage(
+                        model = ApiClient.DATABASE_BASE_URL + item.iconPath,
+                        contentDescription = null,
+                        modifier = Modifier.size(150.dp),
+                    )
+                }
+                Column(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    // Карточка с редкостью
+                    InfoCard(
+                        icon = Icons.Default.Star,
+                        title = "Редкость",
+                        content = item.color,
+                        color = when (item.color) {
+                            "DEFAULT" -> Color(0x93B4B4B4)
+                            "RANK_NEWBIE" -> Color(0xFF4CAF50)
+                            "RANK_STALKER" -> Color(0xFF2196F3)
+                            "RANK_VETERAN" -> Color(0xFFFF00DC)
+                            "RANK_MASTER" -> Color(0xFFB00000)
+                            "RANK_LEGEND" -> Color(0xFFFFEB3B)
+                            else -> Color(0x93FFFFFF)
+                        }
+                    )
 
-        item {
-            // Основная информация в карточках
-            Column(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                // Карточка с редкостью
-                InfoCard(
-                    icon = Icons.Default.Star,
-                    title = "Редкость",
-                    content = item.color,
-                    color = when (item.color) {
-                        "DEFAULT" -> Color(0x93B4B4B4)
-                        "RANK_NEWBIE" -> Color(0xFF4CAF50)
-                        "RANK_STALKER" -> Color(0xFF2196F3)
-                        "RANK_VETERAN" -> Color(0xFFFF00DC)
-                        "RANK_MASTER" -> Color(0xFFB00000)
-                        "RANK_LEGEND" -> Color(0xFFFFEB3B)
-                        else -> Color(0x93FFFFFF)
-                    }
-                )
+                    InfoCard(
+                        icon = Icons.Default.List,
+                        title = "Категория",
+                        content = item.category
+                    )
 
-                InfoCard(
-                    icon = Icons.Default.List,
-                    title = "Категория",
-                    content = item.category
-                )
-
-                InfoCard(
-                    icon = Icons.Default.Lock,
-                    title = "Статус",
-                    content = item.status.state,
-                    isMultiline = true
-                )
+                    InfoCard(
+                        icon = Icons.Default.Info,
+                        title = "Статус",
+                        content = item.status.state
+                    )
+                }
             }
         }
 
@@ -174,13 +171,13 @@ fun ItemDetailContent(
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
             }
-            itemsIndexed(item.infoBlocks as List<InfoBlock>) { index, infoblock ->
+            itemsIndexed(item.infoBlocks as List<InfoBlock>) { _, infoblock ->
                 Box(
                     Modifier
-                        .background(if (index%2==0) Color(0xFFBABABA) else Color(0xFF878787))
                         .fillMaxWidth()
+                        .padding(16.dp, 0.dp)
                 ) {
-                    when (infoblock.type) {
+                    when (infoblock?.type) {
                         "text" -> TextBlockLine(infoblock as InfoBlock.TextBlock)
                         "damage" -> DamageBlockLine(infoblock as InfoBlock.DamageBlock)
                         "list" -> ListBlockLine(infoblock as InfoBlock.ListBlock)
@@ -208,7 +205,7 @@ fun ItemBlockLine(block: InfoBlock.ItemBlock) {
         horizontalArrangement = Arrangement.SpaceBetween
     ){
         Text(
-            text = block.name.toString(),
+            text = stringify(block.name)?: "",
             fontWeight = FontWeight.SemiBold
         )
     }
@@ -221,7 +218,7 @@ fun UsageBlockLine(block: InfoBlock.UsageBlock) {
         horizontalArrangement = Arrangement.SpaceBetween
     ){
         Text(
-            text = block.name.toString(),
+            text = stringify(block.name)?: "",
             fontWeight = FontWeight.SemiBold
         )
     }
@@ -234,11 +231,11 @@ fun RangeBlockLine(block: InfoBlock.RangeBlock) {
         horizontalArrangement = Arrangement.SpaceBetween
     ){
         Text(
-            text = block.name.toString(),
+            text = stringify(block.name)?: "",
             fontWeight = FontWeight.SemiBold
         )
         Text(
-            text = "[${block.min}, ${block.min}]",
+            text = "[${block.min}, ${block.max}]",
             fontWeight = FontWeight.Medium
         )
     }
@@ -251,11 +248,11 @@ fun KeyValueBlockLine(block: InfoBlock.KeyValueBlock) {
         horizontalArrangement = Arrangement.SpaceBetween
     ){
         Text(
-            text = block.key.toString(),
+            text = stringify(block.key)?: "",
             fontWeight = FontWeight.SemiBold
         )
         Text(
-            text = block.value.toString(),
+            text = stringify(block.value)?: "",
             fontWeight = FontWeight.Medium
         )
     }
@@ -268,37 +265,32 @@ fun NumericBlockLine(block: InfoBlock.NumericBlock) {
         horizontalArrangement = Arrangement.SpaceBetween
     ){
         Text(
-            text = block.name.toString(),
+            text = stringify(block.name)?: "",
             fontWeight = FontWeight.SemiBold
         )
         Text(
-            text = block.formatted.toString(),
-            fontWeight = FontWeight.Medium
+            text = block.formatted.value.ru.toString(),
+            fontWeight = FontWeight.Medium,
+            color = Color(android.graphics.Color.parseColor("#${block.formatted.valueColor}"))
         )
     }
 }
 
 @Composable
 fun ListBlockLine(block: InfoBlock.ListBlock) {
-    LazyColumn(
+    Column(
         modifier = Modifier.fillMaxWidth()
     ){
-        itemsIndexed(block.elements as List<InfoBlock>) { index, infoblock ->
-            Box(
-                Modifier
-                    .background(if (index%2==0) Color(0xFFBABABA) else Color(0xFF878787))
-                    .fillMaxWidth()
-            ) {
-                when (infoblock.type) {
-                    "text" -> TextBlockLine(infoblock as InfoBlock.TextBlock)
-                    "damage" -> DamageBlockLine(infoblock as InfoBlock.DamageBlock)
-                    "list" -> ListBlockLine(infoblock as InfoBlock.ListBlock)
-                    "numeric" -> NumericBlockLine(infoblock as InfoBlock.NumericBlock)
-                    "key-value" -> KeyValueBlockLine(infoblock as InfoBlock.KeyValueBlock)
-                    "range" -> RangeBlockLine(infoblock as InfoBlock.RangeBlock)
-                    "usage" -> UsageBlockLine(infoblock as InfoBlock.UsageBlock)
-                    "item" -> ItemBlockLine(infoblock as InfoBlock.ItemBlock)
-                }
+        for (infoblock in block.elements!!) {
+            when (infoblock.type) {
+                "text" -> TextBlockLine(infoblock as InfoBlock.TextBlock)
+                "damage" -> DamageBlockLine(infoblock as InfoBlock.DamageBlock)
+                "list" -> ListBlockLine(infoblock as InfoBlock.ListBlock)
+                "numeric" -> NumericBlockLine(infoblock as InfoBlock.NumericBlock)
+                "key-value" -> KeyValueBlockLine(infoblock as InfoBlock.KeyValueBlock)
+                "range" -> RangeBlockLine(infoblock as InfoBlock.RangeBlock)
+                "usage" -> UsageBlockLine(infoblock as InfoBlock.UsageBlock)
+                "item" -> ItemBlockLine(infoblock as InfoBlock.ItemBlock)
             }
         }
     }
@@ -349,19 +341,19 @@ fun TextBlockLine(block: InfoBlock.TextBlock) {
         horizontalArrangement = Arrangement.SpaceBetween
     ){
         Text(
-            text = block.title.toString(),
+            text = block.title?.let {stringify(it).toString()} ?: "",
             fontWeight = FontWeight.SemiBold
         )
         Text(
-            text = block.text.toString(),
-            fontWeight = FontWeight.Medium
+            text = stringify(block.text)?: "",
+            fontWeight = FontWeight.Light
         )
     }
 }
 
 @Composable
 fun InfoCard(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: ImageVector,
     title: String,
     content: String,
     color: Color = MaterialTheme.colorScheme.primary,
@@ -399,12 +391,21 @@ fun InfoCard(
                 )
                 Text(
                     text = content,
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = if (isMultiline) FontWeight.Normal else FontWeight.Medium,
+                    style = MaterialTheme.typography.bodySmall,
+                    fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurface,
-                    modifier = if (isMultiline) Modifier.padding(top = 4.dp) else Modifier
+                    modifier = Modifier.padding(top = 4.dp)
                 )
             }
         }
+    }
+}
+
+private fun stringify(
+    value: TranslationString
+): String? {
+    return when (value) {
+        is TranslationString.Text -> value.text
+        is TranslationString.Translation -> value.lines.ru
     }
 }
