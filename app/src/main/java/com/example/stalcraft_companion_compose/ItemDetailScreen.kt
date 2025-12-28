@@ -276,7 +276,7 @@ fun ItemDetailContent(
                             .fillMaxWidth()
                             .padding(16.dp, 0.dp)
                     ) {
-                        when (infoblock?.type) {
+                        when (infoblock.type) {
                             "text" -> TextBlockLine(infoblock as InfoBlock.TextBlock)
                             "damage" -> DamageBlockLine(infoblock as InfoBlock.DamageBlock)
                             "list" -> ListBlockLine(infoblock as InfoBlock.ListBlock)
