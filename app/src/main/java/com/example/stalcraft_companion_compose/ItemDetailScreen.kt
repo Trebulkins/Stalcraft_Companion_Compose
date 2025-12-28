@@ -1,5 +1,6 @@
 package com.example.stalcraft_companion_compose
 
+import android.content.res.Configuration
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,6 +15,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -27,6 +32,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -39,6 +45,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -110,27 +117,26 @@ fun ItemDetailContent(
     item: Item,
     modifier: Modifier = Modifier
 ) {
-    LazyColumn(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        item {
-            Row(
-                Modifier.fillMaxWidth().padding(4.dp, 12.dp)
-            ){
-                Box(
-                    modifier = Modifier.fillMaxHeight().width(160.dp).align(Alignment.CenterVertically).padding(horizontal = 4.dp)
-                ){
-                    GlideImage(
-                        model = ApiClient.DATABASE_BASE_URL + item.iconPath,
-                        contentDescription = null,
-                        modifier = Modifier.size(150.dp),
-                    )
-                }
-                Column(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+    if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        LazyColumn(
+            modifier = modifier.padding(horizontal = 44.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            item {
+                Row(
+                    Modifier.fillMaxWidth().height(150.dp).padding(4.dp, 12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
+                    Box(
+                        modifier = Modifier.fillMaxHeight().width(150.dp)
+                            .align(Alignment.CenterVertically).padding(horizontal = 4.dp)
+                    ) {
+                        GlideImage(
+                            model = ApiClient.DATABASE_BASE_URL + item.iconPath,
+                            contentDescription = null,
+                            modifier = Modifier.size(150.dp),
+                        )
+                    }
                     // Карточка с редкостью
                     InfoCard(
                         icon = Icons.Default.Star,
@@ -144,56 +150,150 @@ fun ItemDetailContent(
                             "RANK_MASTER" -> Color(0xFFB00000)
                             "RANK_LEGEND" -> Color(0xFFFFEB3B)
                             else -> Color(0x93FFFFFF)
-                        }
+                        },
+                        modifier = Modifier.width(160.dp)
                     )
 
                     InfoCard(
                         icon = Icons.Default.List,
                         title = "Категория",
-                        content = item.category
+                        content = item.category,
+                        modifier = Modifier.width(160.dp)
                     )
 
                     InfoCard(
                         icon = Icons.Default.Info,
                         title = "Статус",
-                        content = item.status.state
+                        content = item.status.state,
+                        modifier = Modifier.width(190.dp)
                     )
                 }
             }
-        }
 
-        if (item.infoBlocks!!.isNotEmpty()) {
-            item {
-                Text(
-                    text = "Характеристики",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
-            }
-            itemsIndexed(item.infoBlocks as List<InfoBlock>) { _, infoblock ->
-                Box(
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp, 0.dp)
-                ) {
-                    when (infoblock?.type) {
-                        "text" -> TextBlockLine(infoblock as InfoBlock.TextBlock)
-                        "damage" -> DamageBlockLine(infoblock as InfoBlock.DamageBlock)
-                        "list" -> ListBlockLine(infoblock as InfoBlock.ListBlock)
-                        "numeric" -> NumericBlockLine(infoblock as InfoBlock.NumericBlock)
-                        "key-value" -> KeyValueBlockLine(infoblock as InfoBlock.KeyValueBlock)
-                        "range" -> RangeBlockLine(infoblock as InfoBlock.RangeBlock)
-                        "usage" -> UsageBlockLine(infoblock as InfoBlock.UsageBlock)
-                        "item" -> ItemBlockLine(infoblock as InfoBlock.ItemBlock)
+            if (item.infoBlocks!!.isNotEmpty()) {
+                item {
+                    Text(
+                        text = "Характеристики",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    )
+                }
+                itemsIndexed(item.infoBlocks as List<InfoBlock>) { _, infoblock ->
+                    Box(
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp, 0.dp)
+                    ) {
+                        when (infoblock?.type) {
+                            "text" -> TextBlockLine(infoblock as InfoBlock.TextBlock)
+                            "damage" -> DamageBlockLine(infoblock as InfoBlock.DamageBlock)
+                            "list" -> ListBlockLine(infoblock as InfoBlock.ListBlock)
+                            "numeric" -> NumericBlockLine(infoblock as InfoBlock.NumericBlock)
+                            "key-value" -> KeyValueBlockLine(infoblock as InfoBlock.KeyValueBlock)
+                            "range" -> RangeBlockLine(infoblock as InfoBlock.RangeBlock)
+                            "usage" -> UsageBlockLine(infoblock as InfoBlock.UsageBlock)
+                            "item" -> ItemBlockLine(infoblock as InfoBlock.ItemBlock)
+                        }
                     }
                 }
             }
-        }
 
-        // Отступ внизу
-        item {
-            Spacer(modifier = Modifier.height(32.dp))
+            // Отступ внизу
+            item {
+                Spacer(modifier = Modifier.height(32.dp))
+            }
+        }
+    } else {
+        LazyColumn(
+            modifier = modifier,
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            item {
+                Row(
+                    Modifier.fillMaxWidth().padding(4.dp, 12.dp)
+                ) {
+                    Box(
+                        modifier = Modifier.fillMaxHeight().width(160.dp)
+                            .align(Alignment.CenterVertically).padding(horizontal = 4.dp)
+                    ) {
+                        GlideImage(
+                            model = ApiClient.DATABASE_BASE_URL + item.iconPath,
+                            contentDescription = null,
+                            modifier = Modifier.size(150.dp),
+                        )
+                    }
+                    Column(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        // Карточка с редкостью
+                        InfoCard(
+                            icon = Icons.Default.Star,
+                            title = "Редкость",
+                            content = item.color,
+                            color = when (item.color) {
+                                "DEFAULT" -> Color(0x93B4B4B4)
+                                "RANK_NEWBIE" -> Color(0xFF4CAF50)
+                                "RANK_STALKER" -> Color(0xFF2196F3)
+                                "RANK_VETERAN" -> Color(0xFFFF00DC)
+                                "RANK_MASTER" -> Color(0xFFB00000)
+                                "RANK_LEGEND" -> Color(0xFFFFEB3B)
+                                else -> Color(0x93FFFFFF)
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+
+                        InfoCard(
+                            icon = Icons.Default.List,
+                            title = "Категория",
+                            content = item.category,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+
+                        InfoCard(
+                            icon = Icons.Default.Info,
+                            title = "Статус",
+                            content = item.status.state,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                }
+            }
+
+            if (item.infoBlocks!!.isNotEmpty()) {
+                item {
+                    Text(
+                        text = "Характеристики",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    )
+                }
+                itemsIndexed(item.infoBlocks as List<InfoBlock>) { _, infoblock ->
+                    Box(
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp, 0.dp)
+                    ) {
+                        when (infoblock?.type) {
+                            "text" -> TextBlockLine(infoblock as InfoBlock.TextBlock)
+                            "damage" -> DamageBlockLine(infoblock as InfoBlock.DamageBlock)
+                            "list" -> ListBlockLine(infoblock as InfoBlock.ListBlock)
+                            "numeric" -> NumericBlockLine(infoblock as InfoBlock.NumericBlock)
+                            "key-value" -> KeyValueBlockLine(infoblock as InfoBlock.KeyValueBlock)
+                            "range" -> RangeBlockLine(infoblock as InfoBlock.RangeBlock)
+                            "usage" -> UsageBlockLine(infoblock as InfoBlock.UsageBlock)
+                            "item" -> ItemBlockLine(infoblock as InfoBlock.ItemBlock)
+                        }
+                    }
+                }
+            }
+
+            // Отступ внизу
+            item {
+                Spacer(modifier = Modifier.height(32.dp))
+            }
         }
     }
 }
@@ -357,7 +457,8 @@ fun InfoCard(
     title: String,
     content: String,
     color: Color = MaterialTheme.colorScheme.primary,
-    isMultiline: Boolean = false
+    isMultiline: Boolean = false,
+    modifier: Modifier
 ) {
     Card(
         colors = CardDefaults.cardColors(
@@ -368,9 +469,7 @@ fun InfoCard(
         )
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
+            modifier = modifier.padding(16.dp),
             verticalAlignment = if (isMultiline) Alignment.Top else Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {

@@ -1,6 +1,7 @@
 package com.example.stalcraft_companion_compose
 
 import android.content.Context
+import android.content.res.Configuration
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
@@ -19,6 +20,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -47,6 +51,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -125,6 +130,7 @@ fun MainScreen(
     }
 
     Scaffold(
+        if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE) Modifier.padding(horizontal = 44.dp) else Modifier,
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
@@ -140,7 +146,8 @@ fun MainScreen(
             if (items.isEmpty()) { LoadingOverlay() }
             else {
                 // Основной контент
-                LazyColumn(
+                LazyVerticalGrid(
+                    columns = GridCells.Adaptive(300.dp),
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(paddingValues)
@@ -345,7 +352,7 @@ fun CategorySection(
 
                     if (items.isNotEmpty()) {
                         Text(
-                            text = "${items.size} предметов",
+                            text = "Предметов: ${items.size}",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                         )

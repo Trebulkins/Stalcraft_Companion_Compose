@@ -25,6 +25,7 @@ converterGson = "2.9.0"
 appcompat = "1.7.0"
 kotlinxCoroutinesAndroid = "1.1.1"
 navigationCompose = "2.9.6"
+foundation = "1.10.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -63,6 +64,7 @@ retrofit2-converter-gson = { module = "com.squareup.retrofit2:converter-gson", v
 rxandroid = { module = "io.reactivex.rxjava2:rxandroid", version.ref = "rxandroid" }
 rxjava = { module = "io.reactivex.rxjava2:rxjava", version.ref = "rxjava" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
+androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
 
 [plugins]
 devtoolsKsp = { id = "com.google.devtools.ksp", version.ref = "ksp"}
