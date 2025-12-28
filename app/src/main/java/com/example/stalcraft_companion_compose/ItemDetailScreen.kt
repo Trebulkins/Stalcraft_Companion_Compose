@@ -151,7 +151,7 @@ fun ItemDetailContent(
                             "RANK_LEGEND" -> Color(0xFFFFEB3B)
                             else -> Color(0x93FFFFFF)
                         },
-                        modifier = Modifier.width(160.dp)
+                        modifier = Modifier.width(180.dp)
                     )
 
                     InfoCard(

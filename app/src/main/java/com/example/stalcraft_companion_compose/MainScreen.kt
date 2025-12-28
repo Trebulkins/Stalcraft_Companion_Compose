@@ -76,6 +76,7 @@ private fun loadData(viewModel: ItemViewModel, owner: LifecycleOwner) {
 
 
 private suspend fun checkForUpdates(viewModel: ItemViewModel, owner: LifecycleOwner, netAvailable: Boolean): Boolean {
+    println("Проверка обновления...")
     if (!netAvailable) {
         println("Нет подключения к интернету")
         loadData(viewModel, owner)
@@ -85,8 +86,10 @@ private suspend fun checkForUpdates(viewModel: ItemViewModel, owner: LifecycleOw
     try {
         val needsUpdate = withContext(Dispatchers.IO) { viewModel.checkForUpdates() }
         if (needsUpdate) {
+            println("Найдено обновление!")
             return true
         } else {
+            println("Обновлений нет!")
             loadData(viewModel, owner)
         }
     } catch (e: Exception) {
@@ -122,49 +125,12 @@ fun MainScreen(
 
     // При запуске приложения проверяем обновление
     LaunchedEffect(Unit) {
+        println("Запуск...")
         showUpdateDialog = checkForUpdates(
             viewModel = viewModel,
             owner = owner,
             netAvailable = viewModel.isNetworkAvailable(context)
         )
-    }
-
-    Scaffold(
-        if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE) Modifier.padding(horizontal = 44.dp) else Modifier,
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text(
-                        "База предметов",
-                        style = MaterialTheme.typography.titleLarge
-                    )
-                }
-            )
-        }
-    ) { paddingValues ->
-        Box(modifier = Modifier.fillMaxSize()) {
-            if (items.isEmpty()) { LoadingOverlay() }
-            else {
-                // Основной контент
-                LazyVerticalGrid(
-                    columns = GridCells.Adaptive(300.dp),
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues)
-
-                ) {
-                    items(uniqueCategories) { category ->
-                        CategorySection(
-                            category = category,
-                            items = itemsByCategory[category] ?: emptyList(),
-                            isExpanded = expandedCategories.contains(category),
-                            onCategoryClick = { viewModel.toggleCategoryExpansion(category) },
-                            onItemClick = { item -> onNavigateToItemDetail(item.id) }
-                        )
-                    }
-                }
-            }
-        }
     }
 
     // Диалог предложения обновления
@@ -229,6 +195,44 @@ fun MainScreen(
                         style = MaterialTheme.typography.bodyMedium
                     )
                     Spacer(modifier = Modifier.height(8.dp))
+                }
+            }
+        }
+    }
+
+    Scaffold(
+        if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE) Modifier.padding(horizontal = 44.dp) else Modifier,
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = {
+                    Text(
+                        "База предметов",
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                }
+            )
+        }
+    ) { paddingValues ->
+        Box(modifier = Modifier.fillMaxSize()) {
+            if (items.isEmpty()) { LoadingOverlay() }
+            else {
+                // Основной контент
+                LazyVerticalGrid(
+                    columns = GridCells.Adaptive(300.dp),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+
+                ) {
+                    items(uniqueCategories) { category ->
+                        CategorySection(
+                            category = category,
+                            items = itemsByCategory[category] ?: emptyList(),
+                            isExpanded = expandedCategories.contains(category),
+                            onCategoryClick = { viewModel.toggleCategoryExpansion(category) },
+                            onItemClick = { item -> onNavigateToItemDetail(item.id) }
+                        )
+                    }
                 }
             }
         }

@@ -4,9 +4,7 @@ import android.content.Context
 import com.example.stalcraft_companion_compose.api.ApiClient
 import com.example.stalcraft_companion_compose.data.models.Item
 import com.example.stalcraft_companion_compose.data.models.Prefs
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.withContext
 
 class ItemRepository(private val itemDao: ItemDao) {
     suspend fun needsUpdate(context: Context): Boolean {
@@ -15,6 +13,7 @@ class ItemRepository(private val itemDao: ItemDao) {
             val localUpdate = Prefs.getLastUpdate(context)
             localUpdate == null || remoteInfo.updatedAt > localUpdate
         } catch (e: Exception) {
+            println("Ошибка обновления: $e")
             false
         }
     }
