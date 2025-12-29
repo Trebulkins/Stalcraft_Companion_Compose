@@ -2,6 +2,7 @@ package com.example.stalcraft_companion_compose
 
 import android.content.res.Configuration
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -57,6 +58,7 @@ import com.example.stalcraft_companion_compose.data.ItemViewModel
 import com.example.stalcraft_companion_compose.data.models.InfoBlock
 import com.example.stalcraft_companion_compose.data.models.Item
 import com.example.stalcraft_companion_compose.data.models.TranslationString
+import androidx.core.graphics.toColorInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -276,7 +278,7 @@ fun ItemDetailContent(
                             .fillMaxWidth()
                             .padding(16.dp, 0.dp)
                     ) {
-                        when (infoblock.type) {
+                        when (infoblock?.type) {
                             "text" -> TextBlockLine(infoblock as InfoBlock.TextBlock)
                             "damage" -> DamageBlockLine(infoblock as InfoBlock.DamageBlock)
                             "list" -> ListBlockLine(infoblock as InfoBlock.ListBlock)
@@ -371,7 +373,12 @@ fun NumericBlockLine(block: InfoBlock.NumericBlock) {
         Text(
             text = block.formatted.value.ru.toString(),
             fontWeight = FontWeight.Medium,
-            color = Color(android.graphics.Color.parseColor("#${block.formatted.valueColor}"))
+            color = if (LocalConfiguration.current.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES) {
+                Color("#${block.formatted.valueColor}".toColorInt())
+            } else when (block.formatted.valueColor) {
+                "53C353", "C15252" -> Color("#${block.formatted.valueColor}".toColorInt())
+                else -> Color.Black
+            }
         )
     }
 }
@@ -381,8 +388,8 @@ fun ListBlockLine(block: InfoBlock.ListBlock) {
     Column(
         modifier = Modifier.fillMaxWidth()
     ){
-        for (infoblock in block.elements!!) {
-            when (infoblock.type) {
+        if (block.elements!!.isNotEmpty()) for (infoblock in block.elements) {
+            when (infoblock?.type) {
                 "text" -> TextBlockLine(infoblock as InfoBlock.TextBlock)
                 "damage" -> DamageBlockLine(infoblock as InfoBlock.DamageBlock)
                 "list" -> ListBlockLine(infoblock as InfoBlock.ListBlock)
